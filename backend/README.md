@@ -1,4 +1,4 @@
-# Credit Jambo Backend API
+# Credit Jambo Backend API for Management
 
 This is the NestJS backend for the Credit Jambo application, designed to manage user authentication, savings, and credit requests.
 

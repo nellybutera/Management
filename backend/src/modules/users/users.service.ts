@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -14,10 +15,22 @@ export class UsersService {
   }
 
   async update(id: number, data: any) {
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+
     return this.prisma.user.update({
       where: { id },
       data,
     });
+  }
+
+  // helper method to clear the RT hash for logout/security events
+  async clearRtHash(userId: number) {
+      await this.prisma.user.update({
+          where: { id: userId },
+          data: { refreshTokenHash: null },
+      });
   }
 
   async remove(id: number) {
