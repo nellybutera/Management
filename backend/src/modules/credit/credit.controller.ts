@@ -1,22 +1,31 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, UseGuards } from '@nestjs/common';
 import { CreditService } from './credit.service';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('credit')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class CreditController {
   constructor(private service: CreditService) {}
 
-  @Post('request')
-  request(@Body() body: { userId: number; amount: number }) {
-    return this.service.requestCredit(body.userId, body.amount);
-  }
-
   @Post('approve/:id')
+  @Roles('ADMIN')
   approve(@Param('id') id: string) {
-    return this.service.approveCredit(Number(id));
+    return this.service.approveCredit(Number(id));
   }
 
   @Get('pending')
+  @Roles('ADMIN')
   pending() {
     return this.service.listPending();
   }
+
+  @Post('reject/:id')
+  @Roles('ADMIN')
+  reject(@Param('id') id: string) {
+    return this.service.rejectCredit(Number(id)); 
+  }
+
+
 }

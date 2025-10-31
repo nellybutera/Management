@@ -3,7 +3,7 @@ import { CreditService } from './credit.service';
 import { PrismaService } from '../../config/prisma.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
-// --- MOCK PRISMA SERVICE ---
+// mock prisma service
 const mockPrismaService = {
   credit: {
     create: jest.fn(),
@@ -16,11 +16,11 @@ const mockPrismaService = {
   },
 };
 
-// --- MOCK DATA ---
+// mock data
 const mockCreditRequest = { id: 1, userId: 1, amount: 1000, status: 'PENDING', createdAt: new Date() };
 const mockApprovedCredit = { ...mockCreditRequest, status: 'APPROVED' };
+const mockRejectedCredit = { ...mockCreditRequest, status: 'REJECTED' }; 
 
-// --------------------------------------------------------------------------------
 
 describe('CreditService', () => {
   let service: CreditService;
@@ -31,7 +31,7 @@ describe('CreditService', () => {
         CreditService,
         {
           provide: PrismaService,
-          useValue: mockPrismaService, // Provide the mock implementation
+          useValue: mockPrismaService, // provide the mock implementation
         },
       ],
     }).compile();
@@ -40,39 +40,19 @@ describe('CreditService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks(); // Clear mocks after each test to prevent bleed-through
+    jest.clearAllMocks(); // clear mocks after each test to prevent bleed-through
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-// --------------------------------------------------------------------------------
-// --- 2. Unit Tests for Each Method ---
-// --------------------------------------------------------------------------------
 
-  describe('requestCredit', () => {
-    it('should successfully create a credit request', async () => {
-      mockPrismaService.credit.create.mockResolvedValue(mockCreditRequest);
-
-      await expect(service.requestCredit(1, 1000)).resolves.toEqual(mockCreditRequest);
-      expect(mockPrismaService.credit.create).toHaveBeenCalledWith({
-        data: { userId: 1, amount: 1000 },
-      });
-    });
-
-    it('should throw BadRequestException for amount <= 0', async () => {
-      await expect(service.requestCredit(1, 0)).rejects.toThrow(BadRequestException);
-      expect(mockPrismaService.credit.create).not.toHaveBeenCalled();
-    });
-  });
-
+  // unit tests for each method 
   describe('approveCredit', () => {
     it('should successfully approve a PENDING credit and update user balance', async () => {
-      // 1. Mock findUnique to return the PENDING credit
+      // mock methods
       mockPrismaService.credit.findUnique.mockResolvedValue(mockCreditRequest);
-      // 2. Mock update to return the APPROVED credit
       mockPrismaService.credit.update.mockResolvedValue(mockApprovedCredit);
-      // 3. Mock user update
       mockPrismaService.user.update.mockResolvedValue({}); // We just need it to be called
 
       const result = await service.approveCredit(1);
@@ -116,6 +96,40 @@ describe('CreditService', () => {
             where: { status: 'PENDING' }, 
             include: { user: true } 
         });
+    });
+  });
+
+  describe('rejectCredit', () => {
+    it('should successfully reject a PENDING credit', async () => {
+      // mock methods
+      mockPrismaService.credit.findUnique.mockResolvedValue(mockCreditRequest);
+      mockPrismaService.credit.update.mockResolvedValue(mockRejectedCredit);
+      
+      const result = await service.rejectCredit(1);
+
+      // Check results and side effects
+      expect(result).toEqual(mockRejectedCredit);
+      expect(mockPrismaService.credit.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { status: 'REJECTED' },
+      });
+      // Important: Ensure user balance is NOT updated on rejection
+      expect(mockPrismaService.user.update).not.toHaveBeenCalled();
+    });
+    
+    it('should return the credit if it is already REJECTED (no re-rejection)', async () => {
+      mockPrismaService.credit.findUnique.mockResolvedValue(mockRejectedCredit);
+
+      const result = await service.rejectCredit(1);
+
+      expect(result).toEqual(mockRejectedCredit);
+      expect(mockPrismaService.credit.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if credit does not exist', async () => {
+      mockPrismaService.credit.findUnique.mockResolvedValue(null);
+
+      await expect(service.rejectCredit(999)).rejects.toThrow(NotFoundException);
     });
   });
 });
