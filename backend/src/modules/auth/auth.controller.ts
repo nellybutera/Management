@@ -2,12 +2,17 @@ import { Controller, Post, Body, ConflictException, UnauthorizedException, Inter
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiBody({ type: RegisterDto })
+  @ApiResponse({ status: 201, description: 'User successfully registered' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   async register(@Body() dto: RegisterDto) {
     try {
       // Assuming AuthService.register throws specific errors
@@ -24,6 +29,9 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ status: 200, description: 'User successfully logged in' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto) {
     try {
       return await this.authService.login(dto);
