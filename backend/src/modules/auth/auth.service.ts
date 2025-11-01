@@ -56,7 +56,7 @@ export class AuthService {
     } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             if (error.code === 'P2002') {
-                throw new ConflictException('Admin user with email already exists');
+                throw new ConflictException('Admin user with this email already exists');
             }
         }
         throw error;
