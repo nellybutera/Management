@@ -39,17 +39,17 @@ Follow these steps to get the application running locally.
     > **Example `.env` (Required Keys):**
     > ```env
     > # Database
-    > DATABASE_URL="postgresql://user:password@localhost:5432/credit_jambo?schema=public"
+    > DATABASE_URL="postgresql://neondb_owner:npg_ST0uPgWAe6KU@ep-late-haze-adleh02d.c-2.us-east-1.aws.neon.tech/credit_jambo?sslmode=require&channel_binding=require"
     >
     > # JWT (Tokens)
-    > JWT_SECRET="YOUR_STRONG_SECRET"
+    > JWT_SECRET="fhn4Lfp20OSo3AjLNkp5C+QOlDI2hOIcPsfgw0TklAk="
     >
     > # Email Service
     > MAIL_HOST=smtp.gmail.com
     > MAIL_PORT=587
     > MAIL_SECURE=false
-    > MAIL_USER="your_email@gmail.com"
-    > MAIL_PASS="your_16_digit_app_password"
+    > MAIL_USER="your_email@gmail.com" (can use personal email for actual testing, to receive real email notifications)
+    > MAIL_PASS="your_16_digit_app_password" (generate own app password in Chrome)
     > ```
 
 4.  **Run Database Migrations**:
