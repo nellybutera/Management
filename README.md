@@ -36,7 +36,7 @@ Follow these steps to get the application running locally.
 3.  **Configure Environment**:
     Create a file named **`.env`** in the `backend/` root. This must contain your database URL, JWT secrets, and mailer credentials.
 
-    > **Example `.env` (Required Keys):**
+    > **Actual `.env` file values for easy testing (Required Keys):**
     > ```env
     > # Database
     > DATABASE_URL="postgresql://neondb_owner:npg_ST0uPgWAe6KU@ep-late-haze-adleh02d.c-2.us-east-1.aws.neon.tech/credit_jambo?sslmode=require&channel_binding=require"
